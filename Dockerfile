@@ -11,6 +11,7 @@ COPY ./pnpm-lock.yaml /app
 
 RUN pnpm install
 
+COPY .env.production .env
 COPY . /app
 
 RUN pnpm run build
