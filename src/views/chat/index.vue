@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
+import { NAutoComplete, NButton, NDropdown, NInput, useDialog, useMessage } from 'naive-ui'
 import html2canvas from 'html2canvas'
 import { Message } from './components'
 import { useScroll } from './hooks/useScroll'
@@ -39,6 +39,8 @@ const { uuid } = route.params as { uuid: string }
 const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
 const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !!item.conversationOptions)))
 
+const chatGptModel = ref<string>('gpt-3.5-turbo')
+const chatGptModelTitle = ref<string>('ChatGPT-3.5')
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
@@ -464,6 +466,28 @@ onUnmounted(() => {
   if (loading.value)
     controller.abort()
 })
+
+const chatGptModels = [
+  {
+    label: 'ChatGPT-3.5',
+    key: 'gpt-3.5-turbo',
+  },
+  {
+    label: 'ChatGPT-4.0',
+    key: 'gpt-4',
+  },
+]
+function handleGptModeSelect(key: string) {
+  chatGptModel.value = key
+  if (key === 'gpt-4') {
+    chatGptModelTitle.value = 'ChatGPT-4.0'
+    ms.info('正在使用 ChatGPT-4.0 聊天')
+  }
+  else {
+    chatGptModelTitle.value = 'ChatGPT-3.5'
+    ms.info('正在使用 ChatGPT-3.5 聊天')
+  }
+}
 </script>
 
 <template>
@@ -553,6 +577,9 @@ onUnmounted(() => {
               </span>
             </template>
           </NButton>
+          <NDropdown trigger="click" :options="chatGptModels" @select="handleGptModeSelect">
+            <NButton>{{ chatGptModelTitle }}</NButton>
+          </NDropdown>
         </div>
       </div>
     </footer>
