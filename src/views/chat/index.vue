@@ -108,6 +108,8 @@ async function onConversation() {
   )
   scrollToBottom()
 
+  options = { ...options, gptModel: chatGptModel.value }
+
   try {
     let lastText = ''
     const fetchChatAPIOnce = async () => {
@@ -238,6 +240,8 @@ async function onRegenerate(index: number) {
       requestOptions: { prompt: message, options: { ...options } },
     },
   )
+
+  options = { ...options, gptModel: chatGptModel.value }
 
   try {
     let lastText = ''
@@ -476,12 +480,20 @@ const chatGptModels = [
     label: 'ChatGPT-4.0',
     key: 'gpt-4',
   },
+  {
+    label: 'ChatGPT-4.0-32k',
+    key: 'gpt-4-32k',
+  },
 ]
 function handleGptModeSelect(key: string) {
   chatGptModel.value = key
   if (key === 'gpt-4') {
     chatGptModelTitle.value = 'ChatGPT-4.0'
     ms.info('正在使用 ChatGPT-4.0 聊天')
+  }
+  else if (key === 'gpt-4-32k') {
+    chatGptModelTitle.value = 'ChatGPT-4.0-32k'
+    ms.info('正在使用 ChatGPT-4.0-32k 聊天')
   }
   else {
     chatGptModelTitle.value = 'ChatGPT-3.5'
