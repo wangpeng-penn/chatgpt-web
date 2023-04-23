@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NDropdown, NInput, useDialog, useMessage } from 'naive-ui'
@@ -16,6 +16,9 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
 import { fetchChatAPIProcess } from '@/api'
 import { t } from '@/locales'
+
+const GptSetting = defineAsyncComponent(() => import('@/components/common/GptSetting/index.vue'))
+const gptSettingShow = ref(false)
 
 let controller = new AbortController()
 
@@ -108,7 +111,24 @@ async function onConversation() {
   )
   scrollToBottom()
 
-  options = { ...options, gptModel: chatGptModel.value }
+  let gptSettings = {
+    max_token: chatGptModel.value === '' ? 7680 : 3584,
+    temperature: 0.9,
+    presence_penalty: 0.6,
+    frequency_penalty: 0.0,
+  }
+  const strGptSettings = localStorage.getItem(`setting.gpt.${chatGptModel.value}`)
+  if (strGptSettings)
+    gptSettings = JSON.parse(strGptSettings)
+
+  options = {
+    ...options,
+    gptModel: chatGptModel.value,
+    gptMaxToken: gptSettings.max_token,
+    gptTemperature: gptSettings.temperature,
+    gptPresencePenalty: gptSettings.presence_penalty,
+    gptFrequencyPenalty: gptSettings.frequency_penalty,
+  }
 
   try {
     let lastText = ''
@@ -241,7 +261,24 @@ async function onRegenerate(index: number) {
     },
   )
 
-  options = { ...options, gptModel: chatGptModel.value }
+  let gptSettings = {
+    max_token: chatGptModel.value === '' ? 7680 : 3584,
+    temperature: 0.9,
+    presence_penalty: 0.6,
+    frequency_penalty: 0.0,
+  }
+  const strGptSettings = localStorage.getItem(`setting.gpt.${chatGptModel.value}`)
+  if (strGptSettings)
+    gptSettings = JSON.parse(strGptSettings)
+
+  options = {
+    ...options,
+    gptModel: chatGptModel.value,
+    gptMaxToken: gptSettings.max_token,
+    gptTemperature: gptSettings.temperature,
+    gptPresencePenalty: gptSettings.presence_penalty,
+    gptFrequencyPenalty: gptSettings.frequency_penalty,
+  }
 
   try {
     let lastText = ''
@@ -592,6 +629,12 @@ function handleGptModeSelect(key: string) {
           <NDropdown trigger="click" :options="chatGptModels" @select="handleGptModeSelect">
             <NButton>{{ chatGptModelTitle }}</NButton>
           </NDropdown>
+          <HoverButton @click="gptSettingShow = true">
+            <span class="text-xl text-[#4f555e] dark:text-white">
+              <SvgIcon icon="ri:settings-4-line" />
+            </span>
+          </HoverButton>
+          <GptSetting v-if="gptSettingShow" v-model:visible="gptSettingShow" :gtp-model="chatGptModel" :gtp-model-title="chatGptModelTitle" />
         </div>
       </div>
     </footer>

@@ -26,7 +26,11 @@ declare namespace Chat {
 	interface ConversationRequest {
 		conversationId?: string
 		parentMessageId?: string
-		gptModel?: string
+		gptModel?: string,
+		gptMaxToken?: number,
+		gptTemperature?: number,
+		gptPresencePenalty?: number,
+		gptFrequencyPenalty?: number
 	}
 
 	interface ConversationResponse {
